@@ -1,33 +1,52 @@
-const tg = window.Telegram.WebApp;
-const user = tg.initDataUnsafe.user;
-const startParam = tg.initDataUnsafe.start_param; 
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
+        button { padding: 15px 30px; font-size: 18px; background: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Verifikasi Tracker</h2>
+    <p>Klik tombol di bawah untuk konfirmasi</p>
+    <button id="btn">KONFIRMASI</button>
 
-// Token bot kamu (agar Web App bisa kirim pesan sendiri)
-const BOT_TOKEN = '7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c';
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-document.getElementById('sendBtn').addEventListener('click', async () => {
-    // Kita cari tahu siapa Admin ID yang harus dikirimi notif
-    // Karena Web App tidak bisa baca database.json, kita kirim info ke bot lewat API
-    
-    const teksNotif = `🔔 **ADA YANG KLIK LINK!**\n\n` +
-                      `👤 Nama: ${user.first_name}\n` +
-                      `🆔 ID: ${user.id}\n` +
-                      `🔗 Username: @${user.username || 'n/a'}\n` +
-                      `📍 Dari Channel: @${startParam || 'Direct'}`;
+        const BOT_TOKEN = '7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c';
+        const ADMIN_ID = 'MASUKKAN_ID_KAMU_DI_SINI'; // <--- GANTI JADI ANGKA ID KAMU!
 
-    // Kirim notifikasi menggunakan Fetch API (Langsung ke Telegram)
-    // Kita butuh admin_id kamu. Ganti 'ID_KAMU' dengan angka ID Telegrammu
-    const ADMIN_ID = 'ID_KAMU'; // Masukkan ID kamu di sini (misal: 12345678)
+        document.getElementById('btn').addEventListener('click', async () => {
+            const user = tg.initDataUnsafe.user;
+            const startParam = tg.initDataUnsafe.start_param || 'Langsung';
 
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: ADMIN_ID,
-            text: teksNotif,
-            parse_mode: 'Markdown'
-        })
-    });
+            const pesan = `🔔 *KLIK TERDETEKSI!*\n\n` +
+                          `👤 Nama: ${user.first_name}\n` +
+                          `🆔 ID: ${user.id}\n` +
+                          `🔗 User: @${user.username || 'n/a'}\n` +
+                          `📍 Asal: @${startParam}`;
 
-    tg.close(); // Tutup setelah kirim
-});
+            // Mengirim notif langsung via API Telegram
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_ID,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                alert("Berhasil Konfirmasi!");
+            } catch (e) {
+                alert("Gagal kirim notif: " + e);
+            }
+
+            tg.close();
+        });
+    </script>
+</body>
+</html>
