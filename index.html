@@ -4,48 +4,59 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
-        button { padding: 15px 30px; font-size: 18px; background: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        .box { background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { padding: 15px 30px; font-size: 18px; background: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h2>Verifikasi Tracker</h2>
-    <p>Klik tombol di bawah untuk konfirmasi</p>
-    <button id="btn">KONFIRMASI</button>
+    <div class="box">
+        <h2 id="greet">Halo!</h2>
+        <p>Silakan klik konfirmasi untuk melanjutkan.</p>
+        <button id="btn">KONFIRMASI</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         const BOT_TOKEN = '7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c';
-        const ADMIN_ID = 'MASUKKAN_ID_KAMU_DI_SINI'; // <--- GANTI JADI ANGKA ID KAMU!
 
         document.getElementById('btn').addEventListener('click', async () => {
             const user = tg.initDataUnsafe.user;
-            const startParam = tg.initDataUnsafe.start_param || 'Langsung';
+            const startParam = tg.initDataUnsafe.start_param || "";
+            
+            // Memecah parameter NamaChannel_IDAdmin
+            // Contoh: "MyChannel_12345678" -> ["MyChannel", "12345678"]
+            const params = startParam.split('_');
+            const channelName = params[0] || "Unknown";
+            const adminId = params[1]; // ID tujuan notifikasi
+
+            if (!adminId) {
+                alert("Error: Link tidak valid (ID Admin tidak ditemukan)");
+                tg.close();
+                return;
+            }
 
             const pesan = `🔔 *KLIK TERDETEKSI!*\n\n` +
-                          `👤 Nama: ${user.first_name}\n` +
-                          `🆔 ID: ${user.id}\n` +
-                          `🔗 User: @${user.username || 'n/a'}\n` +
-                          `📍 Asal: @${startParam}`;
+                          `👤 *Nama:* ${user.first_name}\n` +
+                          `🆔 *ID:* ${user.id}\n` +
+                          `🔗 *User:* @${user.username || 'n/a'}\n` +
+                          `📍 *Dari:* @${channelName}`;
 
-            // Mengirim notif langsung via API Telegram
             try {
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        chat_id: ADMIN_ID,
+                        chat_id: adminId,
                         text: pesan,
                         parse_mode: 'Markdown'
                     })
                 });
-                alert("Berhasil Konfirmasi!");
+                tg.close();
             } catch (e) {
                 alert("Gagal kirim notif: " + e);
             }
-
-            tg.close();
         });
     </script>
 </body>
