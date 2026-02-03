@@ -1,43 +1,63 @@
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-const BOT_TOKEN = "7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c";
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
+        .box { background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { padding: 15px 30px; font-size: 18px; background: #0088cc; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2 id="greet">Halo!</h2>
+        <p>Silakan klik konfirmasi untuk melanjutkan.</p>
+        <button id="btn">KONFIRMASI</button>
+    </div>
 
-const tg = window.Telegram.WebApp;
-tg.ready();
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-const p = new URLSearchParams(location.search);
-const channel = p.get("channel");
-const adminId = p.get("admin");
+        const BOT_TOKEN = '7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c';
 
-let userInfo = "User tidak terdeteksi";
+        document.getElementById('btn').addEventListener('click', async () => {
+            const user = tg.initDataUnsafe.user;
+            const startParam = tg.initDataUnsafe.start_param || "";
+            
+            // Memecah parameter NamaChannel_IDAdmin
+            // Contoh: "MyChannel_12345678" -> ["MyChannel", "12345678"]
+            const params = startParam.split('_');
+            const channelName = params[0] || "Unknown";
+            const adminId = params[1]; // ID tujuan notifikasi
 
-if (tg.initDataUnsafe?.user) {
-  const u = tg.initDataUnsafe.user;
-  userInfo =
-`👤 USER KLIK
-ID: ${u.id}
-Username: @${u.username || "-"}
-Nama: ${u.first_name}`;
-}
+            if (!adminId) {
+                alert("Error: Link tidak valid (ID Admin tidak ditemukan)");
+                tg.close();
+                return;
+            }
 
-const msg =
-`🔔 LINK DIKLIK
-Channel: @${channel}
+            const pesan = `🔔 *KLIK TERDETEKSI!*\n\n` +
+                          `👤 *Nama:* ${user.first_name}\n` +
+                          `🆔 *ID:* ${user.id}\n` +
+                          `🔗 *User:* @${user.username || 'n/a'}\n` +
+                          `📍 *Dari:* @${channelName}`;
 
-${userInfo}
-⏰ ${new Date().toLocaleString()}`;
-
-fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({
-    chat_id: adminId,
-    text: msg
-  })
-});
-
-// redirect ke channel
-setTimeout(() => {
-  location.href = "https://t.me/" + channel;
-}, 800);
-             </script>
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: adminId,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                tg.close();
+            } catch (e) {
+                alert("Gagal kirim notif: " + e);
+            }
+        });
+    </script>
+</body>
+</html>
