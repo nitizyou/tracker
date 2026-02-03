@@ -1,8 +1,33 @@
-const startParam = window.Telegram.WebApp.initDataUnsafe.start_param; 
-const payload = {
-    nama: window.Telegram.WebApp.initDataUnsafe.user.first_name,
-    id: window.Telegram.WebApp.initDataUnsafe.user.id,
-    user: window.Telegram.WebApp.initDataUnsafe.user.username || "n/a",
-    chat_username: "@" + startParam // Menghubungkan ke database bot
-};
-window.Telegram.WebApp.sendData(JSON.stringify(payload));
+const tg = window.Telegram.WebApp;
+const user = tg.initDataUnsafe.user;
+const startParam = tg.initDataUnsafe.start_param; 
+
+// Token bot kamu (agar Web App bisa kirim pesan sendiri)
+const BOT_TOKEN = '7724868804:AAHF80ekS10OPSqJaaC7rWq-TQnmw7eUk1c';
+
+document.getElementById('sendBtn').addEventListener('click', async () => {
+    // Kita cari tahu siapa Admin ID yang harus dikirimi notif
+    // Karena Web App tidak bisa baca database.json, kita kirim info ke bot lewat API
+    
+    const teksNotif = `🔔 **ADA YANG KLIK LINK!**\n\n` +
+                      `👤 Nama: ${user.first_name}\n` +
+                      `🆔 ID: ${user.id}\n` +
+                      `🔗 Username: @${user.username || 'n/a'}\n` +
+                      `📍 Dari Channel: @${startParam || 'Direct'}`;
+
+    // Kirim notifikasi menggunakan Fetch API (Langsung ke Telegram)
+    // Kita butuh admin_id kamu. Ganti 'ID_KAMU' dengan angka ID Telegrammu
+    const ADMIN_ID = 'ID_KAMU'; // Masukkan ID kamu di sini (misal: 12345678)
+
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: ADMIN_ID,
+            text: teksNotif,
+            parse_mode: 'Markdown'
+        })
+    });
+
+    tg.close(); // Tutup setelah kirim
+});
