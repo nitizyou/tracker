@@ -1,59 +1,20 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body>
-    <div id="content">
-        <div class="loader"></div>
-        <p>Sedang memproses...</p>
-    </div>
+// Pastikan script ini dipanggil setelah Telegram Web App script
+const tg = window.Telegram.WebApp;
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+// 1. Ambil data orang yang sedang buka app (Si Peng-klik)
+const userKlik = tg.initDataUnsafe.user;
 
-        const botToken = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
-        const startParam = tg.initDataUnsafe.start_param;
-        const user = tg.initDataUnsafe.user;
+// 2. Ambil data orang yang share (Parameter dari link bot tadi)
+const startParam = tg.initDataUnsafe.start_param; 
 
-        if (startParam && user) {
-            const [channelName, adminId] = startParam.split('_');
-            
-            const message = `👤 **PENGUNJUNG MINI APP**\n` +
-                          `━━━━━━━━━━━━━━━\n` +
-                          `Nama: ${user.first_name} ${user.last_name || ''}\n` +
-                          `ID: \`${user.id}\`\n` +
-                          `Username: @${user.username || '-'}\n` +
-                          `Asal: @${channelName}\n` +
-                          `━━━━━━━━━━━━━━━`;
+if (userKlik) {
+    console.log(`User yang klik: ${userKlik.first_name} (ID: ${userKlik.id})`);
+}
 
-            // Kirim notifikasi ke Admin
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: adminId,
-                    text: message,
-                    parse_mode: 'Markdown'
-                })
-            }).then(() => {
-                // Tampilan setelah data terkirim
-                document.getElementById('content').innerHTML = "<h2>✅ Berhasil diverifikasi</h2>";
-                // Optional: Tutup otomatis setelah 3 detik
-                // setTimeout(() => { tg.close(); }, 3000);
-            });
-        } else {
-            document.getElementById('content').innerHTML = "<h2>Akses Ditolak</h2>";
-        }
-    </script>
-</body>
-</html>
+if (startParam) {
+    console.log(`Link ini berasal dari share user ID: ${startParam}`);
+    // Di sini kamu bisa simpan ke database kalau si A masuk lewat link si B
+}
+
+// Beritahu Telegram kalau app sudah siap
+tg.ready();
